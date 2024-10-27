@@ -1,3 +1,3 @@
 # Task Tracker CLI 
-## This is a basic CLI Application to track your tasks. 
+## A CLI app to track your tasks and manage your to-do list.
 
