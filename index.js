@@ -1,19 +1,19 @@
 // Dependencies
 const fs = require("fs").promises;
 const path = require("path");
-const readline = require("readline");
+const { intro, outro, text, select } = require("@clack/prompts");
 
 // Constants
-const filePath = path.join(__dirname, "tasks.json");
+const TASKS_FILE = path.join(__dirname, "tasks.json");
 
 // Load all the tasks
 async function loadTasks() {
   try {
-    const data = await fs.readFile(filePath, "utf8");
+    const data = await fs.readFile(TASKS_FILE, "utf8");
     return JSON.parse(data || "[]");
   } catch (err) {
     if (err.code === "ENOENT") {
-      await fs.writeFile(filePath, JSON.stringify([]));
+      await fs.writeFile(TASKS_FILE, JSON.stringify([]));
       return [];
     } else {
       console.error("Error loading tasks:", err);
@@ -32,8 +32,20 @@ async function listTasks() {
   }
 }
 
+// save tasks
+
+async function saveTasks(tasks) {
+  await fs.writeFile(TASKS_FILE, JSON.stringify(tasks, null, 2));
+}
+
 async function addTask(description) {
   const tasks = await loadTasks();
+
+  if (tasks.length === 0) {
+    console.log("No tasks found!");
+    return;
+  }
+
   tasks.push({
     id: tasks.length + 1,
     description,
@@ -41,7 +53,7 @@ async function addTask(description) {
     inProgress: false,
   });
 
-  await fs.writeFile(filePath, JSON.stringify(tasks, null, 2));
+  await fs.writeFile(TASKS_FILE, JSON.stringify(tasks, null, 2));
   console.log("Task Added: ", description);
 }
 
