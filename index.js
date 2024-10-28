@@ -41,12 +41,13 @@ async function addTask(description) {
     inProgress: false,
   });
 
-  await fs.writeFileSync(filePath, JSON.stringify(tasks, null, 2));
+  await fs.writeFile(filePath, JSON.stringify(tasks, null, 2));
   console.log("Task Added: ", description);
 }
 
-const command = process.argv[3];
-const description = process.argv[4];
+const command = process.argv[2];
+const description = process.argv[3];
+console.log(description);
 
 switch (command) {
   case "list":

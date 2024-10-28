@@ -4,5 +4,11 @@
     "description": "Drink a Coffee",
     "completed": false,
     "inProgress": false
+  },
+  {
+    "id": 2,
+    "description": "Read Book",
+    "completed": false,
+    "inProgress": false
   }
 ]
