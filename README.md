@@ -19,7 +19,6 @@ A command line application for managing and organizing your tasks and to-do list
 git clone https://github.com/nstlgy/task-tracker-cli.git
 cd task-tracker-cli
 npm install
-npm link
 ```
 
 ## Usage
@@ -27,7 +26,7 @@ npm link
 ### List all tasks
 
 ```bash
-task-cli list
+node index.js list
 ```
 
 # Project Link : https://roadmap.sh/projects/task-tracker
