@@ -1,7 +1,14 @@
 // Dependencies
 const fs = require("fs").promises;
 const path = require("path");
-const { intro, outro, text, select } = require("@clack/prompts");
+const {
+  intro,
+  outro,
+  text,
+  select,
+  spinner,
+  multiselect,
+} = require("@clack/prompts");
 
 // Constants
 const TASKS_FILE = path.join(__dirname, "tasks.json");
@@ -22,6 +29,39 @@ async function loadTasks() {
   }
 }
 
+// default prompt with options
+async function defaultPrompt() {
+  const userSelection = await select({
+    message: "What would you like to do?",
+    options: [
+      { value: "list_all", label: "List all tasks", hint: "Show every task" },
+      {
+        value: "list_done",
+        label: "List completed tasks",
+        hint: "Show finished tasks",
+      },
+      {
+        value: "list_not_done",
+        label: "List incomplete tasks",
+        hint: "Show unfinished tasks",
+      },
+      {
+        value: "list_progress",
+        label: "List in-progress tasks",
+        hint: "Show active tasks",
+      },
+      { value: "add", label: "Add new task", hint: "Create task" },
+      {
+        value: "update",
+        label: "Update task status",
+        hint: "Mark as in progress/done",
+      },
+      { value: "delete", label: "Delete task", hint: "Remove task" },
+    ],
+    required: true,
+  });
+}
+
 // list all tasks
 async function listTasks() {
   try {
@@ -33,7 +73,6 @@ async function listTasks() {
 }
 
 // save tasks
-
 async function saveTasks(tasks) {
   await fs.writeFile(TASKS_FILE, JSON.stringify(tasks, null, 2));
 }
@@ -53,13 +92,12 @@ async function addTask(description) {
     inProgress: false,
   });
 
-  await fs.writeFile(TASKS_FILE, JSON.stringify(tasks, null, 2));
+  saveTasks(tasks);
   console.log("Task Added: ", description);
 }
 
 const command = process.argv[2];
 const description = process.argv[3];
-console.log(description);
 
 switch (command) {
   case "list":
@@ -73,6 +111,12 @@ switch (command) {
       console.log("please provide a task description");
     }
     break;
+
+  case "delete":
+    break;
+
+  default:
+    defaultPrompt();
 }
 
 // Error Handling
