@@ -1,1 +1,8 @@
-[]
+[
+  {
+    "id": 1,
+    "description": "Drink a Coffee",
+    "completed": false,
+    "inProgress": false
+  }
+]
