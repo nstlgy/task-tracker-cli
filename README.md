@@ -41,16 +41,16 @@ node index.js help
 node index.js add "Take a shower"
 ```
 
-### Delete Task
-
-```bash
-node index.js delete 1
-```
-
 ### Update Task
 
 ```bash
 node index.js update 1 "Take a shower tomorrow"
+```
+
+### Delete Task
+
+```bash
+node index.js delete 1
 ```
 
 ### Toggle Task Status
