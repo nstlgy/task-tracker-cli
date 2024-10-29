@@ -1,16 +1,15 @@
 const fs = require("fs").promises;
 const path = require("path");
 
-// CONSTANTS
+// CONSTANTS & IMPORTS
 const TASKS_FILE = path.join(__dirname, "tasks.json");
 
-// load all tasks
+// FILE OPERATIONS
 async function loadTasks() {
   try {
     const data = await fs.readFile(TASKS_FILE, "utf8");
     return JSON.parse(data || "[]");
   } catch (err) {
-    // ENOENT : Error No Entity (Specified file/directory doesnt exist)
     if (err.code === "ENOENT") {
       await fs.writeFile(TASKS_FILE, JSON.stringify([]));
       return [];
@@ -21,7 +20,11 @@ async function loadTasks() {
   }
 }
 
-// List all tasks
+async function saveTasks(tasks) {
+  await fs.writeFile(TASKS_FILE, JSON.stringify(tasks, null, 2));
+}
+
+// TASK OPERATIONS
 async function listTasks() {
   try {
     const tasks = await loadTasks();
@@ -31,20 +34,16 @@ async function listTasks() {
   }
 }
 
-// add a new task
 async function addTask(description) {
   try {
     const tasks = await loadTasks();
-
     const newTask = {
       id: tasks.length + 1,
       description,
       completed: false,
       inProgress: false,
     };
-
     tasks.push(newTask);
-
     await saveTasks(tasks);
     console.log(`Task Added Succesfully: [${newTask.id}] - ${description}`);
   } catch (err) {
@@ -52,17 +51,10 @@ async function addTask(description) {
   }
 }
 
-// Save tasks into the file
-async function saveTasks(tasks) {
-  await fs.writeFile(TASKS_FILE, JSON.stringify(tasks, null, 2));
-}
-
-// Update Task
 async function updateTasks(id, newDescription) {
   try {
     const tasks = await loadTasks();
     const taskId = parseInt(id);
-
     const taskIndex = tasks.findIndex((task) => task.id === taskId);
 
     if (taskIndex === -1) {
@@ -72,14 +64,45 @@ async function updateTasks(id, newDescription) {
 
     tasks[taskIndex].description = newDescription;
     await saveTasks(tasks);
-
     console.log(`Task ${id} updated successfully to: ${newDescription}`);
   } catch (err) {
     console.log("Error updating task:", err);
   }
 }
 
-// CLI
+async function deleteTask(id) {
+  try {
+    const tasks = await loadTasks();
+    const taskId = parseInt(id);
+    const taskIndex = tasks.findIndex((task) => task.id === taskId);
+
+    if (taskIndex === -1) {
+      console.log(`Task with id ${id} not found`);
+      return;
+    }
+
+    tasks.splice(taskIndex, 1);
+    await saveTasks(tasks);
+    console.log(`✓ Task ${id} deleted successfully`);
+  } catch (err) {
+    console.log("Error deleting task:", err);
+  }
+}
+
+// UI/HELP
+function showHelp() {
+  console.log(`
+Available Commands:
+  list              - Show all tasks
+  add <description> - Add a new task
+  update <id> <description> - Update a task
+  delete <id>       - Delete a task
+  toggle <id>       - Toggle task status (Not Started → In Progress → Completed)
+  help              - Show this help message
+  `);
+}
+
+// CLI HANDLING
 const command = process.argv[2];
 const description = process.argv[3];
 
@@ -106,6 +129,19 @@ switch (command) {
         `Please provide an "id" and "description" in the format "update <id> <description>" `,
       );
     }
+    break;
+
+  case "delete":
+    const deleteId = process.argv[3];
+    if (deleteId) {
+      deleteTask(deleteId);
+    } else {
+      console.log("Please provide a task id to delete!");
+    }
+    break;
+
+  case "help":
+    showHelp();
     break;
 
   default:
