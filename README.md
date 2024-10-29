@@ -29,4 +29,30 @@ npm install
 node index.js list
 ```
 
+### Help Menu
+
+```bash
+node index.js help
+```
+
+### Add Task
+
+```bash
+node index.js add "Take a shower"
+```
+
+### Delete Task
+
+```bash
+node index.js delete 1
+```
+
+### Update Task
+
+```bash
+node index.js update 1 "Take a shower tomorrow"
+```
+
+### Toggle Task Status
+
 # Project Link : https://roadmap.sh/projects/task-tracker
