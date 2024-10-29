@@ -33,6 +33,15 @@ node index.js list
 
 ```bash
 node index.js help
+
+Available Commands:
+  list              - Show all tasks
+  add <description> - Add a new task
+  update <id> <description> - Update a task
+  delete <id>       - Delete a task
+  toggle <id>       - Toggle task status (Not Started → In Progress → Completed)
+  help              - Show this help message
+
 ```
 
 ### Add Task
