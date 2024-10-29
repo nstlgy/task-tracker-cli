@@ -25,6 +25,8 @@ async function saveTasks(tasks) {
 }
 
 // TASK OPERATIONS
+
+// List Task
 async function listTasks() {
   try {
     const tasks = await loadTasks();
@@ -34,6 +36,7 @@ async function listTasks() {
   }
 }
 
+// Add Task
 async function addTask(description) {
   try {
     const tasks = await loadTasks();
@@ -51,6 +54,7 @@ async function addTask(description) {
   }
 }
 
+// Update Task
 async function updateTasks(id, newDescription) {
   try {
     const tasks = await loadTasks();
@@ -70,6 +74,7 @@ async function updateTasks(id, newDescription) {
   }
 }
 
+// Delete Task
 async function deleteTask(id) {
   try {
     const tasks = await loadTasks();
@@ -86,6 +91,42 @@ async function deleteTask(id) {
     console.log(`✓ Task ${id} deleted successfully`);
   } catch (err) {
     console.log("Error deleting task:", err);
+  }
+}
+
+// Toggle Task Status
+async function toggleTask(id, taskStatus) {
+  try {
+    const tasks = await loadTasks();
+    const taskId = parseInt(id);
+    const taskIndex = tasks.findIndex((task) => task.id === taskId);
+
+    if (taskIndex === -1) {
+      console.log(`Task with id ${id} not found`);
+      return;
+    }
+
+    const task = tasks[taskIndex];
+
+    switch (taskStatus) {
+      case "done":
+        task.completed = true;
+        task.inProgress = false;
+        break;
+      case "in-progress":
+        task.completed = false;
+        task.inProgress = true;
+        break;
+      default:
+        task.completed = false;
+        task.inProgress = false;
+        break;
+    }
+
+    await saveTasks(tasks);
+    console.log(`Task ${id} status updated to ${taskStatus}`);
+  } catch (err) {
+    console.log("Error updating task status:", err);
   }
 }
 
@@ -137,6 +178,17 @@ switch (command) {
       deleteTask(deleteId);
     } else {
       console.log("Please provide a task id to delete!");
+    }
+    break;
+
+  // node index.js status 1 done/in-progress
+  case "status":
+    const statusId = process.argv[3];
+    const taskStatus = process.argv[4];
+    if (statusId && taskStatus) {
+      toggleTask(statusId, taskStatus);
+    } else {
+      console.log("Please provide a task id and task status!");
     }
     break;
 

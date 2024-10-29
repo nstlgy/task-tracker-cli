@@ -64,4 +64,10 @@ node index.js delete 1
 
 ### Toggle Task Status
 
+```bash
+node index.js status 1 done // Mark task as done
+
+node index.js status 1 in-progress //Mark task in-progress
+```
+
 # Project Link : https://roadmap.sh/projects/task-tracker
