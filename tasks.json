@@ -1,13 +1,13 @@
 [
   {
     "id": 1,
-    "description": "Drink a Coffee",
+    "description": "HELLO THERE",
     "completed": false,
     "inProgress": false
   },
   {
     "id": 2,
-    "description": "Read Book",
+    "description": "HELLO THERE",
     "completed": false,
     "inProgress": false
   }

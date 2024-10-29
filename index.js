@@ -1,68 +1,27 @@
-// Dependencies
 const fs = require("fs").promises;
 const path = require("path");
-const {
-  intro,
-  outro,
-  text,
-  select,
-  spinner,
-  multiselect,
-} = require("@clack/prompts");
 
-// Constants
+// CONSTANTS
 const TASKS_FILE = path.join(__dirname, "tasks.json");
 
-// Load all the tasks
+// load all tasks
 async function loadTasks() {
   try {
     const data = await fs.readFile(TASKS_FILE, "utf8");
     return JSON.parse(data || "[]");
   } catch (err) {
+    // ENOENT : Error No Entity (Specified file/directory doesnt exist)
     if (err.code === "ENOENT") {
       await fs.writeFile(TASKS_FILE, JSON.stringify([]));
       return [];
     } else {
-      console.error("Error loading tasks:", err);
+      console.log("Error loading tasks", err);
       throw err;
     }
   }
 }
 
-// default prompt with options
-async function defaultPrompt() {
-  const userSelection = await select({
-    message: "What would you like to do?",
-    options: [
-      { value: "list_all", label: "List all tasks", hint: "Show every task" },
-      {
-        value: "list_done",
-        label: "List completed tasks",
-        hint: "Show finished tasks",
-      },
-      {
-        value: "list_not_done",
-        label: "List incomplete tasks",
-        hint: "Show unfinished tasks",
-      },
-      {
-        value: "list_progress",
-        label: "List in-progress tasks",
-        hint: "Show active tasks",
-      },
-      { value: "add", label: "Add new task", hint: "Create task" },
-      {
-        value: "update",
-        label: "Update task status",
-        hint: "Mark as in progress/done",
-      },
-      { value: "delete", label: "Delete task", hint: "Remove task" },
-    ],
-    required: true,
-  });
-}
-
-// list all tasks
+// List all tasks
 async function listTasks() {
   try {
     const tasks = await loadTasks();
@@ -72,30 +31,55 @@ async function listTasks() {
   }
 }
 
-// save tasks
+// add a new task
+async function addTask(description) {
+  try {
+    const tasks = await loadTasks();
+
+    const newTask = {
+      id: tasks.length + 1,
+      description,
+      completed: false,
+      inProgress: false,
+    };
+
+    tasks.push(newTask);
+
+    await saveTasks(tasks);
+    console.log(`Task Added Succesfully: [${newTask.id}] - ${description}`);
+  } catch (err) {
+    console.log("Error adding task", err);
+  }
+}
+
+// Save tasks into the file
 async function saveTasks(tasks) {
   await fs.writeFile(TASKS_FILE, JSON.stringify(tasks, null, 2));
 }
 
-async function addTask(description) {
-  const tasks = await loadTasks();
+// Update Task
+async function updateTasks(id, newDescription) {
+  try {
+    const tasks = await loadTasks();
+    const taskId = parseInt(id);
 
-  if (tasks.length === 0) {
-    console.log("No tasks found!");
-    return;
+    const taskIndex = tasks.findIndex((task) => task.id === taskId);
+
+    if (taskIndex === -1) {
+      console.log(`Task with id ${id} not found`);
+      return;
+    }
+
+    tasks[taskIndex].description = newDescription;
+    await saveTasks(tasks);
+
+    console.log(`Task ${id} updated successfully to: ${newDescription}`);
+  } catch (err) {
+    console.log("Error updating task:", err);
   }
-
-  tasks.push({
-    id: tasks.length + 1,
-    description,
-    completed: false,
-    inProgress: false,
-  });
-
-  saveTasks(tasks);
-  console.log("Task Added: ", description);
 }
 
+// CLI
 const command = process.argv[2];
 const description = process.argv[3];
 
@@ -108,19 +92,24 @@ switch (command) {
     if (description) {
       addTask(description);
     } else {
-      console.log("please provide a task description");
+      console.log("Please provide a task description!");
     }
     break;
 
-  case "delete":
+  case "update":
+    const id = process.argv[3];
+    const newDescription = process.argv[4];
+    if (id && newDescription) {
+      updateTasks(id, newDescription);
+    } else {
+      console.log(
+        `Please provide an "id" and "description" in the format "update <id> <description>" `,
+      );
+    }
     break;
 
   default:
-    defaultPrompt();
+    console.log(
+      "Unknown command. Use 'help' to see list of all available commands.",
+    );
 }
-
-// Error Handling
-process.on("uncaughtException", (err) => {
-  console.error(`There was an uncaught error: ${err}`);
-  process.exit(1);
-});
