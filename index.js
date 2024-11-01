@@ -26,11 +26,22 @@ async function saveTasks(tasks) {
 
 // TASK OPERATIONS
 
-// List Task
-async function listTasks() {
+// List Task || type: completed|todo/in-progress
+async function listTasks(type) {
   try {
     const tasks = await loadTasks();
-    console.log(tasks);
+    switch (type) {
+      case "completed":
+        console.log(tasks.filter((task) => task.completed === true));
+        break;
+
+      case "in-progress":
+        console.log(tasks.filter((task) => task.inProgress === true));
+        break;
+
+      default:
+        console.log(tasks);
+    }
   } catch (err) {
     console.log(err);
   }
@@ -48,7 +59,7 @@ async function addTask(description) {
     };
     tasks.push(newTask);
     await saveTasks(tasks);
-    console.log(`Task Added Succesfully: [${newTask.id}] - ${description}`);
+    console.log(`✓ Task Added Succesfully: [${newTask.id}] - ${description}`);
   } catch (err) {
     console.log("Error adding task", err);
   }
@@ -68,7 +79,7 @@ async function updateTasks(id, newDescription) {
 
     tasks[taskIndex].description = newDescription;
     await saveTasks(tasks);
-    console.log(`Task ${id} updated successfully to: ${newDescription}`);
+    console.log(`✓ Task ${id} updated successfully to: ${newDescription}`);
   } catch (err) {
     console.log("Error updating task:", err);
   }
@@ -88,7 +99,7 @@ async function deleteTask(id) {
 
     tasks.splice(taskIndex, 1);
     await saveTasks(tasks);
-    console.log(`✓ Task ${id} deleted successfully`);
+    console.log(`✓ Task ${id} deleted successfully!`);
   } catch (err) {
     console.log("Error deleting task:", err);
   }
@@ -147,9 +158,19 @@ Available Commands:
 const command = process.argv[2];
 const description = process.argv[3];
 
+// console.log(process.argv);
+
 switch (command) {
   case "list":
-    listTasks();
+    if (process.argv[3] === "completed") {
+      listTasks("completed");
+    } else if (process.argv[3] === "todo") {
+      listTasks();
+    } else if (process.argv[3] === "in-progress") {
+      listTasks("in-progress");
+    } else {
+      listTasks();
+    }
     break;
 
   case "add":
