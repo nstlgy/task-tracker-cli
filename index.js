@@ -26,24 +26,29 @@ async function saveTasks(tasks) {
 
 // TASK OPERATIONS
 
-// List Task || type: completed|todo/in-progress
-async function listTasks(type) {
+// List Task (status: done | todo | in-progress)
+async function listTasks(status) {
   try {
     const tasks = await loadTasks();
-    switch (type) {
-      case "completed":
-        console.log(tasks.filter((task) => task.completed === true));
-        break;
 
-      case "in-progress":
-        console.log(tasks.filter((task) => task.inProgress === true));
-        break;
-
-      default:
-        console.log(tasks);
+    if (status) {
+      const filteredTasks = tasks.filter((task) => task.status === status);
+      if (filteredTasks.length === 0) {
+        console.log(`No tasks with status: ${status}`);
+      } else {
+        console.log(`Tasks with status ${status}:`);
+        console.table(filteredTasks);
+      }
+    } else {
+      if (tasks.length === 0) {
+        console.log("No tasks found");
+      } else {
+        console.log("All tasks:");
+        console.table(tasks);
+      }
     }
   } catch (err) {
-    console.log(err);
+    console.error("Error listing tasks:", err);
   }
 }
 
@@ -51,11 +56,14 @@ async function listTasks(type) {
 async function addTask(description) {
   try {
     const tasks = await loadTasks();
+    const now = new Date();
+    const currentDate = now.toLocaleString();
     const newTask = {
       id: tasks.length + 1,
       description,
-      completed: false,
-      inProgress: false,
+      status: "todo",
+      createdAt: currentDate,
+      updatedAt: null,
     };
     tasks.push(newTask);
     await saveTasks(tasks);
@@ -71,6 +79,8 @@ async function updateTasks(id, newDescription) {
     const tasks = await loadTasks();
     const taskId = parseInt(id);
     const taskIndex = tasks.findIndex((task) => task.id === taskId);
+    const now = new Date();
+    const currentDate = now.toLocaleString();
 
     if (taskIndex === -1) {
       console.log(`Task with id ${id} not found`);
@@ -78,8 +88,11 @@ async function updateTasks(id, newDescription) {
     }
 
     tasks[taskIndex].description = newDescription;
+    tasks[taskIndex].updatedAt = currentDate;
     await saveTasks(tasks);
-    console.log(`✓ Task ${id} updated successfully to: ${newDescription}`);
+    console.log(
+      `✓ Task ${id} updated successfully to: ${newDescription} at ${currentDate}`,
+    );
   } catch (err) {
     console.log("Error updating task:", err);
   }
@@ -121,16 +134,13 @@ async function toggleTask(id, taskStatus) {
 
     switch (taskStatus) {
       case "done":
-        task.completed = true;
-        task.inProgress = false;
+        task.status = "done";
         break;
       case "in-progress":
-        task.completed = false;
-        task.inProgress = true;
+        task.status = "in-progress";
         break;
-      default:
-        task.completed = false;
-        task.inProgress = false;
+      case "todo":
+        task.status = "todo";
         break;
     }
 
@@ -145,12 +155,24 @@ async function toggleTask(id, taskStatus) {
 function showHelp() {
   console.log(`
 Available Commands:
-  list              - Show all tasks
-  add <description> - Add a new task
-  update <id> <description> - Update a task
-  delete <id>       - Delete a task
-  toggle <id>       - Toggle task status (Not Started → In Progress → Completed)
-  help              - Show this help message
+  list [status]           - Show all tasks or filter by status
+                            (todo, done, in-progress)
+  add <description>       - Add a new task
+  update <id> <desc>      - Update a task's description
+  delete <id>             - Delete a task
+  status <id> <status>    - Change task status (todo/done/in-progress)
+  help                    - Show this help message
+
+Task Statuses:
+  todo         - Task not yet started
+  in-progress  - Task currently in progress
+  done         - Task completed
+
+Examples:
+  $ node index.js add "Buy groceries"
+  $ node index.js list todo
+  $ node index.js status 1 in-progress
+  $ node index.js update 1 "Buy healthy groceries"
   `);
 }
 
@@ -162,14 +184,17 @@ const description = process.argv[3];
 
 switch (command) {
   case "list":
-    if (process.argv[3] === "completed") {
-      listTasks("completed");
-    } else if (process.argv[3] === "todo") {
+    const status = process.argv[3];
+    const validStatuses = ["done", "todo", "in-progress"];
+
+    if (!status) {
       listTasks();
-    } else if (process.argv[3] === "in-progress") {
-      listTasks("in-progress");
+    } else if (validStatuses.includes(status)) {
+      listTasks(status);
     } else {
-      listTasks();
+      console.log(
+        "Invalid status parameter! Valid values: todo, done, in-progress",
+      );
     }
     break;
 
@@ -202,10 +227,10 @@ switch (command) {
     }
     break;
 
-  // node index.js status 1 done/in-progress
   case "status":
     const statusId = process.argv[3];
-    const taskStatus = process.argv[4];
+    const taskStatus = process.argv[4].toString();
+    console.log(taskStatus);
     if (statusId && taskStatus) {
       toggleTask(statusId, taskStatus);
     } else {
