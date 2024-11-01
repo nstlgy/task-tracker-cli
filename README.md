@@ -55,7 +55,7 @@ Available Commands:
   list [status]           - Show all tasks or filter by status
                             (todo, done, in-progress)
   add <description>       - Add a new task
-  update <id> <desc>      - Update a task's description
+  update <id> <desc>      - Update a task description
   delete <id>             - Delete a task
   status <id> [option]    - Change task status (todo/done/in-progress)
   help                    - Show this help message
